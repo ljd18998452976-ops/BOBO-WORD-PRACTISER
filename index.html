@@ -878,10 +878,14 @@
       if (wordEditor) {
         wordEditor.value = blocksToEditorText();
       }
+
+      // 先渲染页面内容，再检测语音。
+      // 有些手机/平板内置浏览器不支持 speechSynthesis，先检测语音会导致后面的板块不显示。
       loadSettings();
-      loadVoicesStrictly();
       renderBlockGrid();
       updateScoreBox();
+      renderWordList();
+      loadVoicesStrictly();
       setTimeout(loadVoicesStrictly, 500);
       setTimeout(loadVoicesStrictly, 1200);
     }
@@ -1240,6 +1244,20 @@
     }
 
     function loadVoicesStrictly() {
+      if (!window.speechSynthesis) {
+        selectedVoice = null;
+        voiceStatus.textContent = "⚠️ 当前浏览器不支持语音播放，但单词板块和拼写练习可以正常使用。建议用 Chrome / Edge / Safari 打开。";
+        voiceStatus.className = "voice-status warning";
+        if (voiceSelect) {
+          voiceSelect.innerHTML = "";
+          const option = document.createElement("option");
+          option.value = "";
+          option.textContent = "当前浏览器不支持语音";
+          voiceSelect.appendChild(option);
+        }
+        return;
+      }
+
       const allVoices = window.speechSynthesis.getVoices();
       britishVoices = allVoices.filter(isBritishVoice);
 
@@ -1279,9 +1297,11 @@
       voiceStatus.className = "voice-status ok";
     }
 
-    window.speechSynthesis.onvoiceschanged = function () {
-      loadVoicesStrictly();
-    };
+    if (window.speechSynthesis) {
+      window.speechSynthesis.onvoiceschanged = function () {
+        loadVoicesStrictly();
+      };
+    }
 
     function selectVoiceManually() {
       if (!voiceSelect) return;
@@ -1301,6 +1321,11 @@
 
     function speak(text) {
       if (!text) return;
+      if (!window.speechSynthesis || typeof SpeechSynthesisUtterance === "undefined") {
+        voiceStatus.textContent = "⚠️ 当前浏览器不支持语音播放。请换 Chrome / Edge / Safari 打开。";
+        voiceStatus.className = "voice-status warning";
+        return;
+      }
       window.speechSynthesis.cancel();
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.lang = "en-GB";
