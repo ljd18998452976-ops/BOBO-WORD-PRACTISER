@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>BOBOspeak - 拼写练习</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BOBOspeak Word Blocks</title>
   <style>
     * {
       box-sizing: border-box;
@@ -21,7 +21,7 @@
     }
 
     .app {
-      width: min(1050px, 100%);
+      width: min(1120px, 100%);
       background: #ffffff;
       border-radius: 28px;
       box-shadow: 0 18px 45px rgba(35, 70, 120, 0.14);
@@ -64,6 +64,18 @@
       font-size: 15px;
     }
 
+    .teacher-badge {
+      display: none;
+      margin-top: 8px;
+      font-size: 13px;
+      font-weight: 800;
+      color: #17633a;
+    }
+
+    body.teacher-mode .teacher-badge {
+      display: block;
+    }
+
     .score-box {
       min-width: 150px;
       padding: 14px 18px;
@@ -76,8 +88,12 @@
 
     .main-grid {
       display: grid;
-      grid-template-columns: 1fr 330px;
+      grid-template-columns: 1fr;
       gap: 20px;
+    }
+
+    body.teacher-mode .main-grid {
+      grid-template-columns: 1fr 350px;
     }
 
     .card {
@@ -87,18 +103,103 @@
       padding: 22px;
     }
 
-    .word-number {
+    .teacher-only {
+      display: none !important;
+    }
+
+    body.teacher-mode .teacher-only {
+      display: block !important;
+    }
+
+    body.teacher-mode button.teacher-only {
+      display: inline-block !important;
+    }
+
+    .screen {
+      display: none;
+    }
+
+    .screen.active {
+      display: block;
+    }
+
+    .screen-title {
+      margin: 0 0 14px;
+      font-size: 26px;
+      color: #1e3a5f;
+    }
+
+    .screen-note {
+      margin: 0 0 18px;
       color: #607d8b;
-      font-size: 14px;
-      margin-bottom: 10px;
+      line-height: 1.6;
+    }
+
+    .block-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 14px;
+    }
+
+    .block-card {
+      border: 2px solid #dce9f6;
+      background: #ffffff;
+      border-radius: 22px;
+      padding: 18px;
+      cursor: pointer;
+      transition: 0.18s ease;
+    }
+
+    .block-card:hover {
+      transform: translateY(-2px);
+      border-color: #2f80ed;
+      box-shadow: 0 10px 20px rgba(47, 128, 237, 0.12);
+    }
+
+    .block-name {
+      font-size: 22px;
+      font-weight: 900;
+      color: #1e3a5f;
+      margin-bottom: 8px;
+    }
+
+    .block-count {
+      color: #607d8b;
       font-weight: 700;
     }
 
-    .meaning {
-      font-size: 24px;
-      font-weight: 800;
+    .study-card {
+      min-height: 270px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      background: #ffffff;
+      border: 2px solid #dce9f6;
+      border-radius: 26px;
+      padding: 24px;
+    }
+
+    .study-word {
+      font-size: 54px;
+      font-weight: 900;
+      color: #1e3a5f;
+      letter-spacing: 1px;
+      margin-bottom: 12px;
+    }
+
+    .study-meaning {
+      font-size: 30px;
+      font-weight: 900;
       color: #263238;
-      margin-bottom: 14px;
+      margin-bottom: 18px;
+    }
+
+    .progress-text {
+      color: #607d8b;
+      font-weight: 800;
+      margin-bottom: 12px;
     }
 
     .voice-status {
@@ -122,11 +223,12 @@
       color: #17633a;
     }
 
-    .btn-row {
+    .btn-row,
+    .nav-row {
       display: flex;
       flex-wrap: wrap;
       gap: 10px;
-      margin-bottom: 18px;
+      margin-top: 16px;
     }
 
     button {
@@ -134,7 +236,7 @@
       border-radius: 16px;
       padding: 12px 16px;
       font-size: 15px;
-      font-weight: 700;
+      font-weight: 800;
       cursor: pointer;
       transition: 0.18s ease;
       background: #e8f2ff;
@@ -166,9 +268,31 @@
       color: #455a64;
     }
 
+    .practice-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 10px;
+    }
+
+    .word-number {
+      color: #607d8b;
+      font-size: 14px;
+      font-weight: 800;
+    }
+
+    .meaning {
+      font-size: 26px;
+      font-weight: 900;
+      color: #263238;
+      margin: 14px 0;
+    }
+
     .section-title {
       font-size: 16px;
-      font-weight: 800;
+      font-weight: 900;
       color: #1e3a5f;
       margin: 18px 0 10px;
     }
@@ -191,7 +315,7 @@
       align-items: center;
       justify-content: center;
       font-size: 28px;
-      font-weight: 800;
+      font-weight: 900;
       color: #2c5d88;
       cursor: pointer;
       user-select: none;
@@ -200,6 +324,13 @@
     .slot.filled {
       border-style: solid;
       background: #edf6ff;
+    }
+
+    .slot.space-slot {
+      width: 24px;
+      border: 0;
+      background: transparent;
+      cursor: default;
     }
 
     .letter-bank {
@@ -220,7 +351,7 @@
       background: #2f80ed;
       color: white;
       font-size: 28px;
-      font-weight: 800;
+      font-weight: 900;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -229,15 +360,11 @@
       box-shadow: 0 8px 14px rgba(47, 128, 237, 0.18);
     }
 
-    .tile:hover {
-      transform: translateY(-2px);
-    }
-
     .feedback {
       min-height: 36px;
       margin-top: 16px;
       font-size: 20px;
-      font-weight: 800;
+      font-weight: 900;
     }
 
     .feedback.correct {
@@ -248,27 +375,29 @@
       color: #d64545;
     }
 
-    .nav-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin-top: 18px;
+    .result-box {
+      text-align: center;
+      padding: 28px;
+      border-radius: 26px;
+      background: #ffffff;
+      border: 2px solid #dce9f6;
     }
 
-    .nav-row button {
-      flex: 1;
-      min-width: 120px;
-    }
-
-    .side-title {
-      font-weight: 800;
-      color: #1e3a5f;
+    .stars {
+      font-size: 42px;
       margin-bottom: 12px;
+    }
+
+    .result-score {
+      font-size: 30px;
+      font-weight: 900;
+      color: #1e3a5f;
+      margin-bottom: 14px;
     }
 
     textarea {
       width: 100%;
-      height: 210px;
+      height: 260px;
       border: 2px solid #dbe8f5;
       border-radius: 18px;
       padding: 14px;
@@ -302,10 +431,16 @@
       margin-top: 12px;
     }
 
+    .side-title {
+      font-weight: 900;
+      color: #1e3a5f;
+      margin-bottom: 12px;
+    }
+
     .mini-label {
       font-size: 13px;
       color: #607d8b;
-      font-weight: 800;
+      font-weight: 900;
       margin-bottom: -4px;
     }
 
@@ -329,16 +464,11 @@
       border-radius: 14px;
       background: #f6f9fd;
       color: #455a64;
-      font-weight: 700;
-      cursor: pointer;
+      font-weight: 800;
     }
 
-    .word-item.active {
-      background: #2f80ed;
-      color: white;
-    }
-
-    @media (max-width: 860px) {
+    @media (max-width: 880px) {
+      body.teacher-mode .main-grid,
       .main-grid {
         grid-template-columns: 1fr;
       }
@@ -349,6 +479,10 @@
         height: 52px;
         font-size: 24px;
       }
+
+      .study-word {
+        font-size: 42px;
+      }
     }
   </style>
 </head>
@@ -356,10 +490,11 @@
   <div class="app">
     <header>
       <div class="header-left">
-        <img src="./logo.jpg" alt="BOBOspeak Logo" class="logo" />
+        <img src="./logo.jpg" alt="BOBOspeak Logo" class="logo">
         <div>
-          <h1>BOBOspeak Spelling Practice</h1>
-          <p class="sub-title">更适合低年级：听英式发音，点击打乱字母，拼出正确单词。</p>
+          <h1>BOBOspeak Word Blocks</h1>
+          <p class="sub-title">选择板块，先学习，再用打乱字母拼单词。</p>
+          <div class="teacher-badge">Teacher Mode 已开启</div>
         </div>
       </div>
 
@@ -369,36 +504,78 @@
     </header>
 
     <div class="main-grid">
-      <section class="card">
-        <div class="word-number" id="wordNumber">Word 1</div>
-        <div class="meaning" id="meaning">中文意思</div>
-
+      <main class="card">
         <div class="voice-status" id="voiceStatus">正在检测英式语音……</div>
 
-        <div class="btn-row">
-          <button class="primary" onclick="speakFullWord()">🔊 听英式发音</button>
-          <button class="ghost" onclick="clearAnswer()">🧹 清空重来</button>
-        </div>
+        <section class="screen active" id="blockScreen">
+          <h2 class="screen-title">选择今天要练习的单词板块</h2>
+          <p class="screen-note">每次只练一个板块，孩子不会一下子面对太多单词。</p>
+          <div class="block-grid" id="blockGrid"></div>
+        </section>
 
-        <div class="section-title">请把字母放进单词格子里：</div>
-        <div class="answer-slots" id="answerSlots"></div>
+        <section class="screen" id="studyScreen">
+          <h2 class="screen-title" id="studyBlockTitle">学习单词</h2>
+          <p class="screen-note">先看英文和中文，听几遍发音，再进入拼写练习。</p>
+          <div class="progress-text" id="studyProgress">1 / 10</div>
+          <div class="study-card">
+            <div class="study-word" id="studyWord">apple</div>
+            <div class="study-meaning" id="studyMeaning">苹果</div>
+            <button class="primary" onclick="speakStudyWord()">🔊 听英式发音</button>
+          </div>
+          <div class="nav-row">
+            <button class="ghost" onclick="goBlockScreen()">返回板块</button>
+            <button onclick="previousStudyWord()">上一个</button>
+            <button onclick="nextStudyWord()">下一个</button>
+            <button class="success" onclick="startPractice()">开始拼写练习</button>
+          </div>
+        </section>
 
-        <div class="section-title">打乱的字母：</div>
-        <div class="letter-bank" id="letterBank"></div>
+        <section class="screen" id="practiceScreen">
+          <div class="practice-head">
+            <h2 class="screen-title" id="practiceBlockTitle">拼写练习</h2>
+            <div class="word-number" id="wordNumber">Word 1 / 10</div>
+          </div>
 
-        <div class="feedback" id="feedback"></div>
+          <div class="meaning" id="meaning">中文意思</div>
 
-        <div class="nav-row">
-          <button class="success" onclick="checkAnswer()">检查答案</button>
-          <button class="warning" onclick="revealAnswer()">显示答案</button>
-          <button onclick="nextWord()">下一题</button>
-        </div>
-      </section>
+          <div class="btn-row">
+            <button class="primary" onclick="speakFullWord()">🔊 听英式发音</button>
+            <button class="ghost" onclick="clearAnswer()">🧹 清空重来</button>
+          </div>
 
-      <aside class="card">
-        <div class="side-title">单词库编辑区</div>
+          <div class="section-title">请把字母放进单词格子里：</div>
+          <div class="answer-slots" id="answerSlots"></div>
+
+          <div class="section-title">打乱的字母：</div>
+          <div class="letter-bank" id="letterBank"></div>
+
+          <div class="feedback" id="feedback"></div>
+
+          <div class="nav-row">
+            <button class="ghost" onclick="goStudyScreen()">返回学习</button>
+            <button class="success" onclick="checkAnswer()">检查答案</button>
+            <button class="warning teacher-only" onclick="revealAnswer()">显示答案</button>
+            <button onclick="nextPracticeWord()">下一题</button>
+          </div>
+        </section>
+
+        <section class="screen" id="resultScreen">
+          <div class="result-box">
+            <div class="stars">⭐ ⭐ ⭐</div>
+            <div class="result-score" id="resultScore">完成啦！</div>
+            <p class="screen-note" id="resultNote">今天的板块已经练习完成。</p>
+            <div class="nav-row" style="justify-content:center">
+              <button class="primary" onclick="restartCurrentBlock()">再练一次</button>
+              <button class="ghost" onclick="goBlockScreen()">选择其他板块</button>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <aside class="card teacher-only">
+        <div class="side-title">老师设置区</div>
         <textarea id="wordEditor" spellcheck="false"></textarea>
-        <button class="primary" style="width:100%; margin-top:10px;" onclick="loadWordsFromEditor()">一键生成练习</button>
+        <button class="primary" style="width:100%; margin-top:10px;" onclick="loadBlocksFromEditor()">一键生成板块</button>
 
         <div class="settings-row">
           <div class="mini-label">发音速度</div>
@@ -415,30 +592,169 @@
         </div>
 
         <p class="small-note">
-          格式：英文单词 | 中文意思<br />
-          例如：<br />
-          apple | 苹果<br />
-          banana | 香蕉<br />
-          sandwich | 三明治<br /><br />
-          说明：这个版本更适合一年级，不需要键盘打字，只需要点击打乱的字母完成拼写。
+          学生链接：直接打开 index.html<br>
+          老师链接：打开 index.html?teacher=1<br><br>
+          格式：<br>
+          [Food]<br>
+          apple | 苹果<br>
+          banana | 香蕉<br><br>
+          [Animals]<br>
+          cat | 猫<br>
+          dog | 狗
         </p>
 
-        <div class="side-title" style="margin-top:18px;">当前题目</div>
+        <div class="side-title" style="margin-top:18px;">当前板块单词</div>
         <div class="word-list" id="wordList"></div>
       </aside>
     </div>
   </div>
 
   <script>
-    let words = [
-      { word: "apple", meaning: "苹果" },
-      { word: "banana", meaning: "香蕉" },
-      { word: "sandwich", meaning: "三明治" },
-      { word: "chocolate", meaning: "巧克力" },
-      { word: "elephant", meaning: "大象" }
+    const isTeacher = new URLSearchParams(window.location.search).get("teacher") === "1";
+    if (isTeacher) {
+      document.body.classList.add("teacher-mode");
+    }
+
+    let blocks = [
+      {
+        name: "Numbers 数字",
+        words: [
+          { word: "one", meaning: "一" }, { word: "two", meaning: "二" }, { word: "three", meaning: "三" }, { word: "four", meaning: "四" },
+          { word: "five", meaning: "五" }, { word: "six", meaning: "六" }, { word: "seven", meaning: "七" }, { word: "eight", meaning: "八" },
+          { word: "nine", meaning: "九" }, { word: "ten", meaning: "十" }, { word: "eleven", meaning: "十一" }, { word: "twelve", meaning: "十二" },
+          { word: "thirteen", meaning: "十三" }, { word: "fourteen", meaning: "十四" }, { word: "fifteen", meaning: "十五" }, { word: "sixteen", meaning: "十六" },
+          { word: "seventeen", meaning: "十七" }, { word: "eighteen", meaning: "十八" }, { word: "nineteen", meaning: "十九" }, { word: "twenty", meaning: "二十" }
+        ]
+      },
+      {
+        name: "Colours 颜色",
+        words: [
+          { word: "red", meaning: "红色" }, { word: "blue", meaning: "蓝色" }, { word: "green", meaning: "绿色" }, { word: "white", meaning: "白色" },
+          { word: "yellow", meaning: "黄色" }, { word: "pink", meaning: "粉色" }, { word: "orange", meaning: "橙色" }, { word: "purple", meaning: "紫色" },
+          { word: "gold", meaning: "金色" }, { word: "brown", meaning: "棕色" }, { word: "grey", meaning: "灰色" }, { word: "black", meaning: "黑色" }
+        ]
+      },
+      {
+        name: "School 学习用品",
+        words: [
+          { word: "glue", meaning: "胶水" }, { word: "ruler", meaning: "尺子" }, { word: "book", meaning: "书" }, { word: "schoolbag", meaning: "书包" },
+          { word: "pencil", meaning: "铅笔" }, { word: "brush", meaning: "画笔" }, { word: "map", meaning: "地图" }, { word: "pencil box", meaning: "笔盒" },
+          { word: "crayon", meaning: "蜡笔" }, { word: "paper", meaning: "纸" }, { word: "pen", meaning: "钢笔" }, { word: "rubber", meaning: "橡皮" }
+        ]
+      },
+      {
+        name: "Fruit 水果",
+        words: [
+          { word: "apple", meaning: "苹果" }, { word: "banana", meaning: "香蕉" }, { word: "grape", meaning: "葡萄" }, { word: "watermelon", meaning: "西瓜" },
+          { word: "orange", meaning: "橙子" }, { word: "pear", meaning: "梨子" }, { word: "mango", meaning: "芒果" }, { word: "strawberry", meaning: "草莓" },
+          { word: "lemon", meaning: "柠檬" }, { word: "peach", meaning: "桃子" }, { word: "pineapple", meaning: "菠萝" }, { word: "kiwi fruit", meaning: "猕猴桃" }
+        ]
+      },
+      {
+        name: "Clothes 服装",
+        words: [
+          { word: "cap", meaning: "帽子" }, { word: "shirt", meaning: "衬衫" }, { word: "socks", meaning: "袜子" }, { word: "sweater", meaning: "毛衣" },
+          { word: "coat", meaning: "大衣" }, { word: "shoes", meaning: "鞋子" }, { word: "jacket", meaning: "夹克衫" }, { word: "dress", meaning: "连衣裙" },
+          { word: "vest", meaning: "背心" }, { word: "skirt", meaning: "短裙" }, { word: "jeans", meaning: "牛仔裤" }, { word: "scarf", meaning: "围巾" },
+          { word: "gloves", meaning: "手套" }, { word: "tie", meaning: "领带" }, { word: "boots", meaning: "靴子" }, { word: "swimsuit", meaning: "泳衣" }
+        ]
+      },
+      {
+        name: "Things 物品",
+        words: [
+          { word: "ball", meaning: "球" }, { word: "table", meaning: "桌子" }, { word: "doll", meaning: "玩具娃娃" }, { word: "phone", meaning: "电话" },
+          { word: "bed", meaning: "床" }, { word: "kite", meaning: "风筝" }, { word: "chair", meaning: "椅子" }, { word: "curtain", meaning: "窗帘" },
+          { word: "door", meaning: "门" }, { word: "clock", meaning: "钟表" }, { word: "lamp", meaning: "灯" }, { word: "spoon", meaning: "勺子" },
+          { word: "cup", meaning: "杯子" }, { word: "sofa", meaning: "沙发" }, { word: "window", meaning: "窗户" }, { word: "bowl", meaning: "碗" },
+          { word: "fork", meaning: "叉子" }, { word: "plate", meaning: "盘子" }, { word: "fridge", meaning: "冰箱" }, { word: "chopsticks", meaning: "筷子" }
+        ]
+      },
+      {
+        name: "People 人物",
+        words: [
+          { word: "boy", meaning: "男孩" }, { word: "son", meaning: "儿子" }, { word: "father", meaning: "父亲" }, { word: "daughter", meaning: "女儿" },
+          { word: "girl", meaning: "女孩" }, { word: "man", meaning: "男人" }, { word: "mother", meaning: "母亲" }, { word: "grandpa", meaning: "祖父 / 外祖父" },
+          { word: "baby", meaning: "婴儿" }, { word: "wife", meaning: "妻子" }, { word: "brother", meaning: "兄 / 弟" }, { word: "grandma", meaning: "祖母 / 外祖母" },
+          { word: "uncle", meaning: "叔 / 舅" }, { word: "sister", meaning: "姐 / 妹" }, { word: "aunt", meaning: "姨 / 姑 / 婶" }, { word: "cousin", meaning: "表 / 堂兄弟姐妹" },
+          { word: "friend", meaning: "朋友" }, { word: "woman", meaning: "女人" }, { word: "children", meaning: "儿童" }, { word: "classmate", meaning: "同学" }
+        ]
+      },
+      {
+        name: "Animals 动物",
+        words: [
+          { word: "cat", meaning: "猫" }, { word: "bird", meaning: "小鸟" }, { word: "lion", meaning: "狮子" }, { word: "frog", meaning: "青蛙" },
+          { word: "dog", meaning: "狗" }, { word: "rabbit", meaning: "兔子" }, { word: "cow", meaning: "奶牛" }, { word: "goat", meaning: "山羊" },
+          { word: "pig", meaning: "猪" }, { word: "snake", meaning: "蛇" }, { word: "fox", meaning: "狐狸" }, { word: "giraffe", meaning: "长颈鹿" },
+          { word: "fish", meaning: "鱼" }, { word: "horse", meaning: "马" }, { word: "bear", meaning: "熊" }, { word: "octopus", meaning: "章鱼" },
+          { word: "duck", meaning: "鸭子" }, { word: "mouse", meaning: "老鼠" }, { word: "ant", meaning: "蚂蚁" }, { word: "hippo", meaning: "河马" },
+          { word: "goose", meaning: "鹅" }, { word: "panda", meaning: "熊猫" }, { word: "zebra", meaning: "斑马" }, { word: "hen", meaning: "母鸡" },
+          { word: "chick", meaning: "小鸡" }, { word: "tiger", meaning: "老虎" }, { word: "monkey", meaning: "猴子" }, { word: "eagle", meaning: "鹰" },
+          { word: "parrot", meaning: "鹦鹉" }, { word: "rooster", meaning: "公鸡" }, { word: "elephant", meaning: "大象" }
+        ]
+      },
+      {
+        name: "Traffic 交通",
+        words: [
+          { word: "car", meaning: "小汽车" }, { word: "bus", meaning: "公共汽车" }, { word: "boat", meaning: "小船" }, { word: "subway", meaning: "地铁" },
+          { word: "bike", meaning: "自行车" }, { word: "ship", meaning: "轮船" }, { word: "taxi", meaning: "出租车" }, { word: "motorbike", meaning: "摩托车" },
+          { word: "train", meaning: "火车" }, { word: "plane", meaning: "飞机" }, { word: "jeep", meaning: "吉普车" }, { word: "scooter", meaning: "踏板车" }
+        ]
+      },
+      {
+        name: "Body 身体器官",
+        words: [
+          { word: "head", meaning: "头" }, { word: "ear", meaning: "耳朵" }, { word: "nose", meaning: "鼻子" }, { word: "hand", meaning: "手" },
+          { word: "finger", meaning: "手指" }, { word: "arm", meaning: "手臂" }, { word: "eye", meaning: "眼睛" }, { word: "face", meaning: "脸" },
+          { word: "hair", meaning: "头发" }, { word: "mouth", meaning: "嘴巴" }, { word: "neck", meaning: "脖子" }, { word: "knee", meaning: "膝盖" },
+          { word: "foot", meaning: "脚" }, { word: "shoulder", meaning: "肩膀" }, { word: "leg", meaning: "腿" }, { word: "elbow", meaning: "肘" }
+        ]
+      },
+      {
+        name: "Jobs 职业",
+        words: [
+          { word: "teacher", meaning: "老师" }, { word: "student", meaning: "学生" }, { word: "doctor", meaning: "医生" }, { word: "nurse", meaning: "护士" },
+          { word: "driver", meaning: "司机" }, { word: "farmer", meaning: "农民" }, { word: "cook", meaning: "厨师" }, { word: "worker", meaning: "工人" },
+          { word: "writer", meaning: "作家" }, { word: "cleaner", meaning: "清洁工" }, { word: "singer", meaning: "歌手" }, { word: "dancer", meaning: "舞蹈家" }
+        ]
+      },
+      {
+        name: "Vegetables 蔬菜",
+        words: [
+          { word: "carrot", meaning: "胡萝卜" }, { word: "potato", meaning: "土豆" }, { word: "tomato", meaning: "西红柿" }, { word: "onion", meaning: "洋葱" }
+        ]
+      },
+      {
+        name: "Plants 植物",
+        words: [
+          { word: "tree", meaning: "树" }, { word: "grass", meaning: "草" }, { word: "bamboo", meaning: "竹子" }, { word: "flower", meaning: "花" }
+        ]
+      },
+      {
+        name: "Food 食物",
+        words: [
+          { word: "egg", meaning: "鸡蛋" }, { word: "salad", meaning: "沙拉" }, { word: "pizza", meaning: "披萨" }, { word: "hot dog", meaning: "热狗" },
+          { word: "cake", meaning: "蛋糕" }, { word: "chips", meaning: "薯条" }, { word: "bread", meaning: "面包" }, { word: "chocolate", meaning: "巧克力" },
+          { word: "beef", meaning: "牛肉" }, { word: "fish", meaning: "鱼" }, { word: "noodles", meaning: "面条" }, { word: "hamburger", meaning: "汉堡" }
+        ]
+      },
+      {
+        name: "Drinks 饮料",
+        words: [
+          { word: "milk", meaning: "牛奶" }, { word: "coke", meaning: "可乐" }, { word: "coffee", meaning: "咖啡" }, { word: "juice", meaning: "果汁" }
+        ]
+      },
+      {
+        name: "Places 场所",
+        words: [
+          { word: "park", meaning: "公园" }, { word: "zoo", meaning: "动物园" }, { word: "school", meaning: "学校" }, { word: "playground", meaning: "操场" },
+          { word: "home", meaning: "家" }, { word: "farm", meaning: "农场" }, { word: "garden", meaning: "花园" }, { word: "hospital", meaning: "医院" }
+        ]
+      }
     ];
 
-    let currentIndex = 0;
+    let currentBlockIndex = 0;
+    let studyIndex = 0;
+    let practiceIndex = 0;
     let score = 0;
     let answeredCorrectly = new Set();
     let britishVoices = [];
@@ -446,210 +762,303 @@
     let currentSlots = [];
     let bankTiles = [];
 
-    const wordEditor = document.getElementById("wordEditor");
-    const meaning = document.getElementById("meaning");
-    const wordNumber = document.getElementById("wordNumber");
     const scoreEl = document.getElementById("score");
     const totalEl = document.getElementById("total");
-    const wordList = document.getElementById("wordList");
+    const voiceStatus = document.getElementById("voiceStatus");
     const voiceRate = document.getElementById("voiceRate");
     const voiceSelect = document.getElementById("voiceSelect");
-    const voiceStatus = document.getElementById("voiceStatus");
+    const wordEditor = document.getElementById("wordEditor");
+    const wordList = document.getElementById("wordList");
+    const blockGrid = document.getElementById("blockGrid");
+    const studyBlockTitle = document.getElementById("studyBlockTitle");
+    const studyProgress = document.getElementById("studyProgress");
+    const studyWord = document.getElementById("studyWord");
+    const studyMeaning = document.getElementById("studyMeaning");
+    const practiceBlockTitle = document.getElementById("practiceBlockTitle");
+    const wordNumber = document.getElementById("wordNumber");
+    const meaning = document.getElementById("meaning");
     const answerSlotsEl = document.getElementById("answerSlots");
     const letterBankEl = document.getElementById("letterBank");
     const feedback = document.getElementById("feedback");
+    const resultScore = document.getElementById("resultScore");
+    const resultNote = document.getElementById("resultNote");
 
     function init() {
-      wordEditor.value = words.map(item => `${item.word} | ${item.meaning}`).join("\n");
+      if (wordEditor) {
+        wordEditor.value = blocksToEditorText();
+      }
       loadSettings();
       loadVoicesStrictly();
-      renderWord();
+      renderBlockGrid();
+      updateScoreBox();
       setTimeout(loadVoicesStrictly, 500);
       setTimeout(loadVoicesStrictly, 1200);
     }
 
-    function getCurrentWord() {
-      return words[currentIndex];
+    function blocksToEditorText() {
+      const lines = [];
+      blocks.forEach(block => {
+        lines.push("[" + block.name + "]");
+        block.words.forEach(item => {
+          lines.push(item.word + " | " + item.meaning);
+        });
+        lines.push("");
+      });
+      return lines.join(String.fromCharCode(10));
     }
 
-    function isBritishVoice(voice) {
-      const lang = (voice.lang || "").toLowerCase();
-      const name = (voice.name || "").toLowerCase();
+    function parseBlocks(text) {
+      const lines = text.split(String.fromCharCode(10)).map(line => line.trim());
+      const newBlocks = [];
+      let currentBlock = null;
 
-      return (
-        lang === "en-gb" ||
-        lang.startsWith("en-gb") ||
-        name.includes("united kingdom") ||
-        name.includes("great britain") ||
-        name.includes("british") ||
-        name.includes("uk english") ||
-        name.includes("english uk") ||
-        name.includes("google uk english") ||
-        name.includes("microsoft george") ||
-        name.includes("microsoft hazel") ||
-        name.includes("microsoft susan") ||
-        name.includes("daniel")
-      );
-    }
+      lines.forEach(line => {
+        if (!line) return;
 
-    function loadVoicesStrictly() {
-      const allVoices = window.speechSynthesis.getVoices();
-      britishVoices = allVoices.filter(isBritishVoice);
-
-      voiceSelect.innerHTML = "";
-
-      if (britishVoices.length === 0) {
-        selectedVoice = null;
-        const option = document.createElement("option");
-        option.value = "";
-        option.textContent = "未检测到英式语音";
-        voiceSelect.appendChild(option);
-
-        voiceStatus.textContent = "⚠️ 当前设备没有检测到真正的英式语音，banana 等单词可能听起来像美式发音。";
-        voiceStatus.className = "voice-status warning";
-        return;
-      }
-
-      const savedVoiceName = localStorage.getItem("selectedBritishVoiceName");
-      selectedVoice = britishVoices.find(v => v.name === savedVoiceName) || britishVoices[0];
-
-      britishVoices.forEach(voice => {
-        const option = document.createElement("option");
-        option.value = voice.name;
-        option.textContent = `${voice.name} (${voice.lang})`;
-        if (selectedVoice && voice.name === selectedVoice.name) {
-          option.selected = true;
+        if (line.startsWith("[") && line.endsWith("]")) {
+          const name = line.slice(1, -1).trim();
+          if (name) {
+            currentBlock = { name: name, words: [] };
+            newBlocks.push(currentBlock);
+          }
+          return;
         }
-        voiceSelect.appendChild(option);
+
+        if (!currentBlock) {
+          currentBlock = { name: "Words", words: [] };
+          newBlocks.push(currentBlock);
+        }
+
+        const parts = line.split("|").map(part => part.trim());
+        const word = cleanWord(parts[0] || "");
+        const meaningText = parts[1] || "请听读音并拼写";
+        if (word) {
+          currentBlock.words.push({ word: word, meaning: meaningText });
+        }
       });
 
-      voiceStatus.textContent = `✅ 当前英式语音：${selectedVoice.name} (${selectedVoice.lang})`;
-      voiceStatus.className = "voice-status ok";
+      return newBlocks.filter(block => block.words.length > 0);
     }
 
-    window.speechSynthesis.onvoiceschanged = function () {
-      loadVoicesStrictly();
-    };
+    function cleanWord(word) {
+      return word.toLowerCase().trim().split(" ").filter(Boolean).join(" ");
+    }
 
-    function selectVoiceManually() {
-      selectedVoice = britishVoices.find(v => v.name === voiceSelect.value) || null;
+    function getCurrentBlock() {
+      return blocks[currentBlockIndex];
+    }
 
-      if (selectedVoice) {
-        localStorage.setItem("selectedBritishVoiceName", selectedVoice.name);
-        voiceStatus.textContent = `✅ 当前英式语音：${selectedVoice.name} (${selectedVoice.lang})`;
-        voiceStatus.className = "voice-status ok";
-        speakFullWord();
+    function getStudyItem() {
+      return getCurrentBlock().words[studyIndex];
+    }
+
+    function getPracticeItem() {
+      return getCurrentBlock().words[practiceIndex];
+    }
+
+    function showScreen(screenId) {
+      document.querySelectorAll(".screen").forEach(screen => {
+        screen.classList.remove("active");
+      });
+      document.getElementById(screenId).classList.add("active");
+    }
+
+    function renderBlockGrid() {
+      blockGrid.innerHTML = "";
+      blocks.forEach((block, index) => {
+        const card = document.createElement("div");
+        card.className = "block-card";
+        card.onclick = function () {
+          chooseBlock(index);
+        };
+
+        const name = document.createElement("div");
+        name.className = "block-name";
+        name.textContent = block.name;
+
+        const count = document.createElement("div");
+        count.className = "block-count";
+        count.textContent = block.words.length + " 个单词";
+
+        card.appendChild(name);
+        card.appendChild(count);
+        blockGrid.appendChild(card);
+      });
+    }
+
+    function chooseBlock(index) {
+      currentBlockIndex = index;
+      studyIndex = 0;
+      practiceIndex = 0;
+      score = 0;
+      answeredCorrectly = new Set();
+      updateScoreBox();
+      renderStudy();
+      showScreen("studyScreen");
+      setTimeout(speakStudyWord, 300);
+    }
+
+    function goBlockScreen() {
+      renderBlockGrid();
+      showScreen("blockScreen");
+    }
+
+    function goStudyScreen() {
+      studyIndex = practiceIndex;
+      renderStudy();
+      showScreen("studyScreen");
+    }
+
+    function renderStudy() {
+      const block = getCurrentBlock();
+      const item = getStudyItem();
+      studyBlockTitle.textContent = "学习板块：" + block.name;
+      studyProgress.textContent = "学习 " + (studyIndex + 1) + " / " + block.words.length;
+      studyWord.textContent = item.word;
+      studyMeaning.textContent = item.meaning;
+      renderWordList();
+    }
+
+    function speakStudyWord() {
+      speak(getStudyItem().word);
+    }
+
+    function nextStudyWord() {
+      const block = getCurrentBlock();
+      studyIndex = (studyIndex + 1) % block.words.length;
+      renderStudy();
+      setTimeout(speakStudyWord, 200);
+    }
+
+    function previousStudyWord() {
+      const block = getCurrentBlock();
+      studyIndex = (studyIndex - 1 + block.words.length) % block.words.length;
+      renderStudy();
+      setTimeout(speakStudyWord, 200);
+    }
+
+    function startPractice() {
+      practiceIndex = 0;
+      score = 0;
+      answeredCorrectly = new Set();
+      updateScoreBox();
+      renderPracticeWord();
+      showScreen("practiceScreen");
+      setTimeout(speakFullWord, 300);
+    }
+
+    function restartCurrentBlock() {
+      startPractice();
+    }
+
+    function renderPracticeWord() {
+      const block = getCurrentBlock();
+      const item = getPracticeItem();
+      practiceBlockTitle.textContent = "拼写练习：" + block.name;
+      wordNumber.textContent = "Word " + (practiceIndex + 1) + " / " + block.words.length;
+      meaning.textContent = item.meaning;
+      feedback.textContent = "";
+      feedback.className = "feedback";
+      currentSlots = item.word.split("").map(char => char === " " ? { id: "space", letter: " ", fixed: true } : null);
+      bankTiles = createShuffledTiles(item.word);
+      renderSlots();
+      renderBank();
+      renderWordList();
+      updateScoreBox();
+    }
+
+    function updateScoreBox() {
+      const block = getCurrentBlock();
+      scoreEl.textContent = score;
+      totalEl.textContent = block ? block.words.length : 0;
+    }
+
+    function nextPracticeWord() {
+      const block = getCurrentBlock();
+      if (practiceIndex >= block.words.length - 1) {
+        showResult();
+        return;
       }
+      practiceIndex += 1;
+      renderPracticeWord();
+      setTimeout(speakFullWord, 250);
     }
 
-    function speak(text) {
-      if (!text) return;
-
-      window.speechSynthesis.cancel();
-
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = "en-GB";
-      utterance.rate = Number(voiceRate.value || 0.9);
-      utterance.pitch = 1;
-
-      if (selectedVoice) {
-        utterance.voice = selectedVoice;
+    function showResult() {
+      const block = getCurrentBlock();
+      resultScore.textContent = "完成啦！得分：" + score + " / " + block.words.length;
+      if (score === block.words.length) {
+        resultNote.textContent = "太棒了，这个板块全部拼对了！";
+      } else {
+        resultNote.textContent = "可以再练一次，把不熟的单词巩固一下。";
       }
-
-      window.speechSynthesis.speak(utterance);
-    }
-
-    function speakFullWord() {
-      if (!selectedVoice) loadVoicesStrictly();
-      speak(getCurrentWord().word);
+      showScreen("resultScreen");
     }
 
     function createShuffledTiles(word) {
-      const arr = word.split("").map((letter, index) => ({
-        id: `${letter}_${index}_${Math.random().toString(36).slice(2, 7)}`,
-        letter
+      const lettersOnly = word.split("").filter(letter => letter !== " ");
+      const arr = lettersOnly.map((letter, index) => ({
+        id: letter + "_" + index + "_" + Math.random().toString(36).slice(2, 7),
+        letter: letter
       }));
 
       for (let i = arr.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
-        [arr[i], arr[j]] = [arr[j], arr[i]];
+        const temp = arr[i];
+        arr[i] = arr[j];
+        arr[j] = temp;
       }
 
-      // 尽量避免刚好没打乱
-      if (arr.map(x => x.letter).join("") === word && arr.length > 1) {
-        [arr[0], arr[1]] = [arr[1], arr[0]];
+      if (arr.map(item => item.letter).join("") === lettersOnly.join("") && arr.length > 1) {
+        const temp = arr[0];
+        arr[0] = arr[1];
+        arr[1] = temp;
       }
-
       return arr;
-    }
-
-    function renderWord() {
-      const item = getCurrentWord();
-      meaning.textContent = item.meaning || "请根据读音拼写单词";
-      wordNumber.textContent = `Word ${currentIndex + 1} / ${words.length}`;
-      totalEl.textContent = words.length;
-      scoreEl.textContent = score;
-      feedback.textContent = "";
-      feedback.className = "feedback";
-
-      currentSlots = new Array(item.word.length).fill(null);
-      bankTiles = createShuffledTiles(item.word);
-
-      renderSlots();
-      renderBank();
-      renderWordList();
-
-      setTimeout(() => {
-        speakFullWord();
-      }, 350);
     }
 
     function renderSlots() {
       answerSlotsEl.innerHTML = "";
-
       currentSlots.forEach((tile, index) => {
         const slot = document.createElement("div");
-        slot.className = "slot" + (tile ? " filled" : "");
-        slot.textContent = tile ? tile.letter : "";
-        slot.onclick = () => removeFromSlot(index);
+        slot.className = "slot" + (tile ? " filled" : "") + (tile && tile.fixed ? " space-slot" : "");
+        slot.textContent = tile && !tile.fixed ? tile.letter : "";
+        slot.onclick = function () {
+          removeFromSlot(index);
+        };
         answerSlotsEl.appendChild(slot);
       });
     }
 
     function renderBank() {
       letterBankEl.innerHTML = "";
-
       bankTiles.forEach(tile => {
         const div = document.createElement("div");
         div.className = "tile";
         div.textContent = tile.letter;
-        div.onclick = () => placeTile(tile.id);
+        div.onclick = function () {
+          placeTile(tile.id);
+        };
         letterBankEl.appendChild(div);
       });
     }
 
     function placeTile(tileId) {
-      const emptyIndex = currentSlots.findIndex(x => x === null);
+      const emptyIndex = currentSlots.findIndex(item => item === null);
       if (emptyIndex === -1) return;
-
-      const tileIndex = bankTiles.findIndex(t => t.id === tileId);
+      const tileIndex = bankTiles.findIndex(tile => tile.id === tileId);
       if (tileIndex === -1) return;
-
-      const tile = bankTiles[tileIndex];
-      currentSlots[emptyIndex] = tile;
+      currentSlots[emptyIndex] = bankTiles[tileIndex];
       bankTiles.splice(tileIndex, 1);
-
       renderSlots();
       renderBank();
     }
 
     function removeFromSlot(slotIndex) {
       const tile = currentSlots[slotIndex];
-      if (!tile) return;
-
+      if (!tile || tile.fixed) return;
       bankTiles.push(tile);
       currentSlots[slotIndex] = null;
-
       renderSlots();
       renderBank();
     }
@@ -661,13 +1070,12 @@
           currentSlots[i] = null;
         }
       }
-
-      // 清空后重新打乱一次，增加游戏感
       for (let i = bankTiles.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
-        [bankTiles[i], bankTiles[j]] = [bankTiles[j], bankTiles[i]];
+        const temp = bankTiles[i];
+        bankTiles[i] = bankTiles[j];
+        bankTiles[j] = temp;
       }
-
       renderSlots();
       renderBank();
       feedback.textContent = "";
@@ -680,7 +1088,7 @@
 
     function checkAnswer() {
       const userAnswer = getUserAnswer().toLowerCase();
-      const correctAnswer = getCurrentWord().word.toLowerCase();
+      const correctAnswer = getPracticeItem().word.toLowerCase();
 
       if (currentSlots.includes(null)) {
         feedback.textContent = "还没拼完哦，先把字母都放进去。";
@@ -691,13 +1099,11 @@
       if (userAnswer === correctAnswer) {
         feedback.textContent = "✅ 太棒了，拼对了！";
         feedback.className = "feedback correct";
-
-        if (!answeredCorrectly.has(currentIndex)) {
-          answeredCorrectly.add(currentIndex);
+        if (!answeredCorrectly.has(practiceIndex)) {
+          answeredCorrectly.add(practiceIndex);
           score += 1;
-          scoreEl.textContent = score;
+          updateScoreBox();
         }
-
         speakFullWord();
       } else {
         feedback.textContent = "❌ 还不对哦，再试试看。";
@@ -706,74 +1112,156 @@
     }
 
     function revealAnswer() {
-      const word = getCurrentWord().word;
+      if (!isTeacher) return;
+      const word = getPracticeItem().word;
       currentSlots = word.split("").map((letter, index) => ({
-        id: `answer_${index}`,
-        letter
+        id: "answer_" + index,
+        letter: letter,
+        fixed: letter === " "
       }));
       bankTiles = [];
-
       renderSlots();
       renderBank();
-
-      feedback.textContent = `答案：${word}`;
+      feedback.textContent = "答案：" + word;
       feedback.className = "feedback correct";
       speakFullWord();
     }
 
-    function nextWord() {
-      currentIndex = (currentIndex + 1) % words.length;
-      renderWord();
+    function speakFullWord() {
+      speak(getPracticeItem().word);
     }
 
-    function loadWordsFromEditor() {
-      const lines = wordEditor.value
-        .split("\n")
-        .map(line => line.trim())
-        .filter(Boolean);
+    function isBritishVoice(voice) {
+      const lang = (voice.lang || "").toLowerCase();
+      const name = (voice.name || "").toLowerCase();
+      return lang === "en-gb" ||
+        lang.startsWith("en-gb") ||
+        name.includes("united kingdom") ||
+        name.includes("great britain") ||
+        name.includes("british") ||
+        name.includes("uk english") ||
+        name.includes("english uk") ||
+        name.includes("google uk english") ||
+        name.includes("microsoft george") ||
+        name.includes("microsoft hazel") ||
+        name.includes("microsoft susan") ||
+        name.includes("daniel");
+    }
 
-      const newWords = lines.map(line => {
-        const parts = line.split("|").map(part => part.trim());
-        return {
-          word: (parts[0] || "").toLowerCase(),
-          meaning: parts[1] || "请听读音并拼写"
-        };
-      }).filter(item => item.word);
+    function loadVoicesStrictly() {
+      const allVoices = window.speechSynthesis.getVoices();
+      britishVoices = allVoices.filter(isBritishVoice);
 
-      if (newWords.length === 0) {
-        alert("请至少输入一个单词。格式：apple | 苹果");
+      if (voiceSelect) {
+        voiceSelect.innerHTML = "";
+      }
+
+      if (britishVoices.length === 0) {
+        selectedVoice = null;
+        if (voiceSelect) {
+          const option = document.createElement("option");
+          option.value = "";
+          option.textContent = "未检测到英式语音";
+          voiceSelect.appendChild(option);
+        }
+        voiceStatus.textContent = "⚠️ 当前设备没有检测到真正的英式语音，banana 等单词可能听起来像美式发音。";
+        voiceStatus.className = "voice-status warning";
         return;
       }
 
-      words = newWords;
-      currentIndex = 0;
+      const savedVoiceName = localStorage.getItem("selectedBritishVoiceName");
+      selectedVoice = britishVoices.find(voice => voice.name === savedVoiceName) || britishVoices[0];
+
+      if (voiceSelect) {
+        britishVoices.forEach(voice => {
+          const option = document.createElement("option");
+          option.value = voice.name;
+          option.textContent = voice.name + " (" + voice.lang + ")";
+          if (selectedVoice && voice.name === selectedVoice.name) {
+            option.selected = true;
+          }
+          voiceSelect.appendChild(option);
+        });
+      }
+
+      voiceStatus.textContent = "✅ 当前英式语音：" + selectedVoice.name + " (" + selectedVoice.lang + ")";
+      voiceStatus.className = "voice-status ok";
+    }
+
+    window.speechSynthesis.onvoiceschanged = function () {
+      loadVoicesStrictly();
+    };
+
+    function selectVoiceManually() {
+      if (!voiceSelect) return;
+      selectedVoice = britishVoices.find(voice => voice.name === voiceSelect.value) || null;
+      if (selectedVoice) {
+        localStorage.setItem("selectedBritishVoiceName", selectedVoice.name);
+        voiceStatus.textContent = "✅ 当前英式语音：" + selectedVoice.name + " (" + selectedVoice.lang + ")";
+        voiceStatus.className = "voice-status ok";
+        const activePractice = document.getElementById("practiceScreen").classList.contains("active");
+        if (activePractice) {
+          speakFullWord();
+        } else {
+          speakStudyWord();
+        }
+      }
+    }
+
+    function speak(text) {
+      if (!text) return;
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = "en-GB";
+      utterance.rate = Number(voiceRate ? voiceRate.value : 0.9);
+      utterance.pitch = 1;
+      if (selectedVoice) {
+        utterance.voice = selectedVoice;
+      }
+      window.speechSynthesis.speak(utterance);
+    }
+
+    function loadBlocksFromEditor() {
+      if (!isTeacher || !wordEditor) return;
+      const newBlocks = parseBlocks(wordEditor.value);
+      if (newBlocks.length === 0) {
+        alert("请至少输入一个板块和一个单词。格式：[Food] 下一行 apple | 苹果");
+        return;
+      }
+      blocks = newBlocks;
+      currentBlockIndex = 0;
+      studyIndex = 0;
+      practiceIndex = 0;
       score = 0;
       answeredCorrectly = new Set();
-      renderWord();
+      renderBlockGrid();
+      updateScoreBox();
+      goBlockScreen();
     }
 
     function renderWordList() {
+      if (!wordList) return;
+      const block = getCurrentBlock();
       wordList.innerHTML = "";
-
-      words.forEach((item, index) => {
+      block.words.forEach((item, index) => {
         const div = document.createElement("div");
-        div.className = "word-item" + (index === currentIndex ? " active" : "");
-        div.textContent = `${index + 1}. ${item.meaning}`;
-        div.onclick = () => {
-          currentIndex = index;
-          renderWord();
-        };
+        div.className = "word-item";
+        div.textContent = (index + 1) + ". " + item.word + " | " + item.meaning;
         wordList.appendChild(div);
       });
     }
 
     function saveSettings() {
-      localStorage.setItem("spellingVoiceRate", voiceRate.value);
+      if (voiceRate) {
+        localStorage.setItem("spellingVoiceRate", voiceRate.value);
+      }
     }
 
     function loadSettings() {
       const savedRate = localStorage.getItem("spellingVoiceRate");
-      if (savedRate) voiceRate.value = savedRate;
+      if (savedRate && voiceRate) {
+        voiceRate.value = savedRate;
+      }
     }
 
     init();
